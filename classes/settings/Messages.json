@@ -1,0 +1,9 @@
+{
+    "INIT":"./messages/init.md",
+    "SELECT_CITY":"./messages/city.md",
+    "SELECT_AGE":"./messages/age.md",
+    "INCORRECT_AGE":"./messages/incorrect_age.md",
+    "SELECT_CONTACT":"./messages/select_contact.md",
+    "SUCCESFULLY_PAYED":"./messages/succesfully_payed.md",
+    "AWAITING_PAYMENT":"./messages/awaiting_payment.md"
+}
