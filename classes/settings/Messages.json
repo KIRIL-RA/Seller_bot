@@ -5,5 +5,6 @@
     "INCORRECT_AGE":"./messages/incorrect_age.md",
     "SELECT_CONTACT":"./messages/select_contact.md",
     "SUCCESFULLY_PAYED":"./messages/succesfully_payed.md",
-    "AWAITING_PAYMENT":"./messages/awaiting_payment.md"
+    "AWAITING_PAYMENT":"./messages/awaiting_payment.md",
+    "INCORRECT_EMAIL":"./messages/incorrect_email.md"
 }

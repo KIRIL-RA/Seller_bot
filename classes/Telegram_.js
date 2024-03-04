@@ -12,6 +12,14 @@ function isNumber(value) {
     return typeof value === 'number' && isFinite(value);
 }
 
+const validateEmail = (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
+
 const getInvoice = (id) => {
     const invoice = {
         chat_id: id, // Unique identifier of the target chat or username of the target channel
@@ -80,7 +88,7 @@ class TelegramBot {
 
             await user.SetPayed();
 
-            await Email.SendOnlyTextMail("TestBot", Settings.TO_MAIL, `ОПЛАТА \nГород: ${user.city}\nВозраст: ${user.age}\nСпособ связи: ${user.contact}`);
+            await Email.SendOnlyTextMail("TestBot", Settings.TO_MAIL, `ОПЛАТА <p>Город: ${user.city}</p> <p>Email: ${user.contact}</p>`);
 
             await SendSuccesfullyPayed(ctx, ctx.from.id);
         })
@@ -99,17 +107,6 @@ class TelegramBot {
         await user.SetStage(Stages.WRITING_CITY);
 
         await this.bot.telegram.sendMessage(userId, fs.readFileSync(Messages.SELECT_CITY, { encoding: 'utf8', flag: 'r' }));
-    }
-
-    async SendSelectAge(ctx, userId) {
-        // Loggining to user
-        await PlatformDatabase.Connect();
-        const user = new User(userId, PlatformDatabase);
-        await user.Login();
-
-        await user.SetStage(Stages.WRITING_AGE);
-
-        await this.bot.telegram.sendMessage(userId, fs.readFileSync(Messages.SELECT_AGE, { encoding: 'utf8', flag: 'r' }));
     }
 
     async SendSelectContact(ctx, userId) {
@@ -159,21 +156,15 @@ class TelegramBot {
         switch (user?.stages[user?.stages.length - 1]) {
             case Stages.WRITING_CITY:
                 await user.SetCity(text)
-                this.SendSelectAge(ctx, ctx.message.from.id);
-                break;
-            case Stages.WRITING_AGE:
-                // Verifying age
-                const age = Number(text);
-                if (!isNumber(age)) {
-                    this.bot.telegram.sendMessage(ctx.message.from.id, fs.readFileSync(Messages.INCORRECT_AGE, { encoding: 'utf8', flag: 'r' }));
-                    this.SendSelectAge(ctx, ctx.message.from.id);
-                    return;
-                }
-
-                await user.SetAge(age)
                 this.SendSelectContact(ctx, ctx.message.from.id);
                 break;
             case Stages.WRITING_CONTACT:
+                if(!validateEmail(text)){
+                    await this.bot.telegram.sendMessage(ctx.message.from.id, fs.readFileSync(Messages.INCORRECT_EMAIL, { encoding: 'utf8', flag: 'r' }));
+                    this.SendSelectContact(ctx, ctx.message.from.id);
+                    return;
+                }
+
                 await user.SetContact(text);
                 this.SendInvoice2(ctx, ctx.message.from.id);
                 break;
