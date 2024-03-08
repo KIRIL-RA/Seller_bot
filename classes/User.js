@@ -2,7 +2,7 @@ const Stages = require('./settings/Stages.json');
 
 class User{
     constructor(id, database){
-        if(id == undefined || id == null) throw new Error('id undefined');
+       // if(id == undefined || id == null) throw new Error('id undefined');
 
         this.database = database;
         this.id = id;
@@ -18,6 +18,8 @@ class User{
         this.age = dataRaw.age;
         this.contact = dataRaw.contact;
         this.isPayed = dataRaw.isPayed;
+        this.paymentId = dataRaw.paymentId;
+        this.id = dataRaw.userId;
     }
 
     /**
@@ -28,6 +30,18 @@ class User{
     async Login(userInfo) {
         // Getting user info from databse
         if (userInfo == undefined || userInfo == null) userInfo = await this.database.GetUser(this.id);
+        if (userInfo == undefined || userInfo == null) return false;
+
+        // Processing user info
+        this.FormatUserData(userInfo);
+        this.isLogined = true;
+
+        return true;
+    }
+
+    async LoginByPayId(id) {
+        // Getting user info from databse
+        let userInfo = await this.database.GetUserByPayId(id);
         if (userInfo == undefined || userInfo == null) return false;
 
         // Processing user info
@@ -50,7 +64,8 @@ class User{
             age: null,
             city: null,
             isPayed: false,
-            contact: null
+            contact: null,
+            paymentId: null
         }
 
         console.log(userInfo);
@@ -77,6 +92,10 @@ class User{
 
     async SetPayed(){
         await this.database.UpdateUser(this.id, {$set: {isPayed: true}});
+    }
+
+    async SetPaymentId(id){
+        await this.database.UpdateUser(this.id, {$set: {paymentId: id}});
     }
 }
 

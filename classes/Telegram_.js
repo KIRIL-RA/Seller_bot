@@ -5,6 +5,7 @@ const { message } = require('telegraf/filters');
 const Settings = require('./settings/AllSettings.json');
 const Email = require("./Email");
 const { PlatformDatabase } = require('./Database');
+const { MakeLink } = require("./YouKassa");
 const User = require('./User');
 const fs = require('fs');
 
@@ -55,7 +56,6 @@ class TelegramBot {
         await PlatformDatabase.Connect();
 
         const SendSelectCity = (ctx, from) => this.SendSelectCity(ctx, from);
-        const SendSuccesfullyPayed = (ctx, from) => this.SendSuccesfullyPayed(ctx, from);
         this.bot.start(async function (ctx) {
 
             // Trying registry new user
@@ -81,20 +81,9 @@ class TelegramBot {
 
         // Processing raw text
         bot.on('pre_checkout_query', (ctx) => ctx.answerPreCheckoutQuery(true));
-        bot.on('successful_payment', async (ctx, next) => {
-            await PlatformDatabase.Connect();
-            const user = new User(ctx.from.id, PlatformDatabase);
-            await user.Login();
-
-            await user.SetPayed();
-
-            await Email.SendOnlyTextMail("TestBot", Settings.TO_MAIL, `ОПЛАТА <p>Город: ${user.city}</p> <p>Email: ${user.contact}</p>`);
-
-            await SendSuccesfullyPayed(ctx, ctx.from.id);
-        })
         bot.on(message('text'), (ctx) => { this.HandleRawText(ctx) });
 
-        await bot.launch();
+        bot.launch();
         this.isInitialized = true;
     }
 
@@ -109,6 +98,18 @@ class TelegramBot {
         await this.bot.telegram.sendMessage(userId, fs.readFileSync(Messages.SELECT_CITY, { encoding: 'utf8', flag: 'r' }));
     }
 
+    async SendPayed(ctx, userId) {
+        await PlatformDatabase.Connect();
+            const user = new User(userId, PlatformDatabase);
+            await user.Login();
+
+            await user.SetPayed();
+
+            //await Email.SendOnlyTextMail("TestBot", Settings.TO_MAIL, `ОПЛАТА <p>Город: ${user.city}</p> <p>Email: ${user.contact}</p>`);
+
+            await this.SendSuccesfullyPayed(ctx, userId);
+    }
+
     async SendSelectContact(ctx, userId) {
 
         // Loggining to user
@@ -121,16 +122,27 @@ class TelegramBot {
         await this.bot.telegram.sendMessage(userId, fs.readFileSync(Messages.SELECT_CONTACT, { encoding: 'utf8', flag: 'r' }));
     }
 
-    async SendInvoice2(ctx, userId) {
-
-        // Loggining to user
+    async SendInvoice(ctx, userId){
         await PlatformDatabase.Connect();
         const user = new User(userId, PlatformDatabase);
         await user.Login();
 
         await user.SetStage(Stages.AWAITING_PAYMENT);
+        const paymentData = await MakeLink();
+        user.SetPaymentId(paymentData.id);
 
-        await ctx.replyWithInvoice(getInvoice(ctx.from.id));
+        let iKeyboard = [];
+        iKeyboard.push([{ text: `Оплатить 25руб.`, url:  paymentData.link}] );
+
+        // Keyboard options
+        let messageOptions = {
+            parse_mode: 'html',
+            reply_markup: {
+                inline_keyboard: iKeyboard
+            }
+        };
+
+        await this.bot.telegram.sendMessage(userId, fs.readFileSync(Messages.AWAITING_PAYMENT, { encoding: 'utf8', flag: 'r' }), messageOptions);
     }
 
     async SendSuccesfullyPayed(ctx, userId) {
@@ -166,7 +178,7 @@ class TelegramBot {
                 }
 
                 await user.SetContact(text);
-                this.SendInvoice2(ctx, ctx.message.from.id);
+                this.SendInvoice(ctx, ctx.message.from.id);
                 break;
             case Stages.AWAITING_PAYMENT:
                 await this.bot.telegram.sendMessage(ctx.message.from.id, fs.readFileSync(Messages.AWAITING_PAYMENT, { encoding: 'utf8', flag: 'r' }));
@@ -182,4 +194,6 @@ class TelegramBot {
     }
 }
 
-module.exports = TelegramBot;
+const tgBot = new TelegramBot("7080661601:AAHlV39wQbwZZ5rUOa6XbJG0K1R01TgBAGs");
+
+module.exports = {TelegramBot, tgBot};

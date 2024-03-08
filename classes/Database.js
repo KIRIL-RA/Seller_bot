@@ -20,6 +20,13 @@ class DBWork {
         return await collection.findOne({userId: userId});
     }
 
+    async GetUserByPayId(id){
+        const datataBase = this.mongoClient.db(Settings.DB_NAME);
+        const collection = datataBase.collection(Settings.USERS_COLLECTION);
+
+        return await collection.findOne({paymentId: id});
+    }
+
     async AddUser(userInfo){
         const datataBase = this.mongoClient.db(Settings.DB_NAME);
         const collection = datataBase.collection(Settings.USERS_COLLECTION);

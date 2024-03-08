@@ -1,18 +1,25 @@
-const Telegram = require('./classes/Telegram_');
+const {tgBot} = require('./classes/Telegram_');
 const { PlatformDatabase } = require('./classes/Database');
-const nodeCron = require("node-cron");
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const cors = require('cors');
+const app = express();
 
-// Main block
-async function Main() {
-    const tgBot = new Telegram(/*'6703114328:AAFKsF16e0BzyQ6Q45nvkA7Lds7OqaID33I'*/
-        "6192355536:AAGl76H3vEWHtJHYGdGJYJjG4tTEJeNWwmw");
-    await tgBot.Init();
+// Setup using modules
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(cors());
 
-    /*// Setting up pay schedule
-    nodeCron.schedule('0 0 8 * * *', ()=>{
-        PayServers(tgBot.shadowsocks, tgBot, PlatformDatabase);
-    });*/
-}
+app.use(`/succesfullypayed`, require('./routes/payment'));
 
-Main();
+// Launching server
+const server = app.listen(80, function () {
+    tgBot.Init();
+
+    const host = server.address().address;
+    const port = server.address().port;
+  });
 
