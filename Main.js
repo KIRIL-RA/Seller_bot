@@ -22,4 +22,3 @@ const server = app.listen(80, function () {
     const host = server.address().address;
     const port = server.address().port;
   });
-
