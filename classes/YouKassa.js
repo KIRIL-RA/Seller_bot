@@ -1,9 +1,9 @@
 const axios = require('axios');
 
-async function MakeLink() {
+async function MakeLink(value) {
     const data = {
         amount: {
-            value: 25.00,
+            value: value,
             currency: "RUB"
         },
         capture: true,

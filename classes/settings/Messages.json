@@ -7,5 +7,9 @@
     "SUCCESFULLY_PAYED":"./messages/succesfully_payed.md",
     "AWAITING_PAYMENT":"./messages/awaiting_payment.md",
     "INCORRECT_EMAIL":"./messages/incorrect_email.md",
-    "ITEM_DESCRIPTION":"./messages/item_description.md"
+    "ITEM_DESCRIPTION":"./messages/item_description.md",
+    "ASK_TICKETS_COUNT":"./messages/enter_tickets_count.md",
+    "INCORRECT_COUNT":"./messages/incorrect_tickets_count.md",
+    "PAYMENT_CANCELED":"./messages/payment_canceled.md",
+    "PAYMENT_FAILED":"./messages/payment_failed.md"
 }

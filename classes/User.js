@@ -20,6 +20,10 @@ class User{
         this.isPayed = dataRaw.isPayed;
         this.paymentId = dataRaw.paymentId;
         this.id = dataRaw.userId;
+        this.allTicketsCount = dataRaw.allTicketsCount;
+        this.nowBuyingTickets = dataRaw.nowBuyingTickets;
+        this.payments = dataRaw.payments;
+        this.paymentMessage = dataRaw.paymentMessage;
     }
 
     /**
@@ -65,7 +69,11 @@ class User{
             city: null,
             isPayed: false,
             contact: null,
-            paymentId: null
+            paymentId: null,
+            nowBuyingTickets: null,
+            allTicketsCount: 0,
+            payments: [],
+            paymentMessage: null
         }
 
         console.log(userInfo);
@@ -96,6 +104,22 @@ class User{
 
     async SetPaymentId(id){
         await this.database.UpdateUser(this.id, {$set: {paymentId: id}});
+    }
+
+    async SetAllTicketsCount(count){
+        await this.database.UpdateUser(this.id, {$set: {allTicketsCount: count}});
+    }
+
+    async SetNowBuyingTicketsCount(count){
+        await this.database.UpdateUser(this.id, {$set: {nowBuyingTickets: count}});
+    }
+
+    async PushPaymentId(obj){
+        await this.database.UpdateUser(this.id, {$push: {payments: obj}});
+    }
+
+    async SetPaymentMessageId(id){
+        await this.database.UpdateUser(this.id, {$set: {paymentMessage: id}});
     }
 }
 

@@ -4,7 +4,10 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
+const https =require('https');
 const app = express();
+const key = fs.readFileSync('./key.pem');
+const cert = fs.readFileSync('./cert.pem');
 
 // Setup using modules
 app.use(logger('dev'));
@@ -15,10 +18,10 @@ app.use(cors());
 
 app.use(`/succesfullypayed`, require('./routes/payment'));
 
-// Launching server
-const server = app.listen(80, function () {
+const server = https.createServer({key: key, cert: cert }, app);
+server.listen(443, function () {
     tgBot.Init();
 
     const host = server.address().address;
     const port = server.address().port;
-  });
+});
